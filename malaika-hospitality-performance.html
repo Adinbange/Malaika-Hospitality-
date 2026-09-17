@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malaika Hospitality Performances</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  function loadScriptOnce(src){
+    return new Promise(function(resolve, reject){
+      var s = document.createElement('script');
+      s.src = src; s.onload = function(){ resolve(); }; s.onerror = function(){ reject(new Error('load failed: '+src)); };
+      document.head.appendChild(s);
+    });
+  }
+  function loadChartJs(){
+    return loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js')
+      .catch(function(){ return loadScriptOnce('https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js'); });
+  }
+  window.__chartJsReady = loadChartJs();
+</script>
+<style>
+  :root{
+    --bg:#F6F7FA;
+    --surface:#FFFFFF;
+    --surface-2:#FBFBFD;
+    --line: rgba(28,34,48,0.09);
+    --ink:#1C2230;
+    --ink-dim:#5C6478;
+    --ink-faint:#9198AA;
+    --h1: #1F3A93;
+    --h2: #7B3FE4;
+    --h3: #0D9488;
+    --gold:#B8862E;
+    --good:#1E8A5F;
+    --bad:#C23B3B;
+    --radius-card: 14px;
+    --radius-pill: 999px;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+    background-image:
+      radial-gradient(ellipse 900px 460px at 12% -10%, rgba(31,58,147,0.05), transparent 60%),
+      radial-gradient(ellipse 900px 460px at 92% 0%, rgba(13,148,136,0.05), transparent 60%);
+  }
+  .wrap{ max-width: 1040px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  header.hero{ padding: 18px 4px 30px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+  .eyebrow-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .marquee-tag{ font-family:'Roboto Mono', monospace; font-size:11px; letter-spacing:0.04em; color: var(--ink-faint); }
+  h1.title{
+    font-family:'Fraunces', serif; font-weight:700;
+    font-size: clamp(28px, 5vw, 42px); line-height:1.1;
+    margin: 10px 0 8px; letter-spacing:-0.01em; color:#141826;
+  }
+  .subtitle{ color: var(--ink-dim); font-size:15px; max-width: 62ch; line-height:1.55; }
+
+  .names-row{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  .name-chip{
+    display:flex; align-items:center; gap:8px;
+    background: var(--surface); border:1px solid var(--line);
+    border-radius: var(--radius-pill); padding: 7px 14px 7px 14px;
+    box-shadow: 0 1px 2px rgba(20,24,38,0.04);
+  }
+  .dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+  .name-chip input, .name-chip select{
+    background:transparent; border:none; color:var(--ink); font-weight:600; font-size:14px;
+    font-family:'Inter',sans-serif; padding:4px 2px;
+  }
+  .name-chip input{ width: 150px; }
+  .name-chip input:focus, .name-chip select:focus{ outline:none; }
+  .name-chip select{ cursor:pointer; color: var(--ink-dim); font-weight:500; }
+
+  .card{
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card);
+    padding: 22px; box-shadow: 0 1px 3px rgba(20,24,38,0.04);
+  }
+  .section-gap{ margin-top: 20px; }
+  .card h2{ font-family:'Fraunces', serif; font-weight:600; font-size:19px; margin:0 0 4px; color:#141826; }
+  .card .hint{ color:var(--ink-dim); font-size:13px; margin-bottom:16px; }
+
+  .date-field{ max-width: 220px; margin-bottom:16px; }
+  .entry-houses-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:14px; }
+  .entry-house-card{
+    background: var(--surface-2); border:1px solid var(--line); border-left-width:3px;
+    border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:12px;
+  }
+  .entry-house-title{ font-weight:600; font-size:13.5px; color:#141826; }
+  .field label{ display:block; font-size:12px; color:var(--ink-dim); margin-bottom:6px; }
+  .field input{
+    width:100%; background: var(--surface); border:1px solid var(--line); border-radius:9px;
+    color:var(--ink); padding:11px 12px; font-family:'Inter',sans-serif; font-size:15px;
+  }
+  .field input:focus{ outline:none; border-color: var(--ink-faint); }
+  .field input:disabled{ background: #F0F1F4; color: var(--ink-faint); cursor:not-allowed; }
+  .field.money{ position:relative; }
+  .field.money .cur{ position:absolute; left:12px; top:37px; color:var(--ink-faint); pointer-events:none; }
+  .field.money input{ padding-left:26px; }
+  .field.people{ position:relative; }
+  .field.people .ppl-icon{ position:absolute; left:12px; top:37px; color:var(--ink-faint); pointer-events:none; font-size:13px; }
+  .field.people input{ padding-left:30px; }
+  button{ font-family:'Inter',sans-serif; cursor:pointer; }
+  .btn-primary{
+    background: var(--h1); color:#fff; border:none; border-radius:9px;
+    padding:12px 22px; font-weight:600; font-size:14px; white-space:nowrap;
+    transition: transform .12s ease, filter .12s ease; margin-top:18px;
+  }
+  .btn-primary:hover{ filter:brightness(1.1); }
+  .btn-primary:active{ transform: scale(0.98); }
+  .btn-primary:disabled{ background:#C7CBD6; cursor:not-allowed; }
+  .form-note{ font-size:12.5px; color: var(--ink-faint); margin-top:10px; }
+  .form-note.locked{ color: var(--bad); font-weight:500; }
+  .form-note.fresh{ color: var(--good); font-weight:500; }
+  .void-link{ background:none; border:none; color:var(--h1); font-size:12.5px; text-decoration:underline; padding:0; margin-left:6px; cursor:pointer; }
+
+  .summary-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
+  @media (max-width:700px){ .summary-grid{ grid-template-columns: 1fr; } }
+  .summary-card{
+    background: var(--surface); border:1px solid var(--line); border-radius: var(--radius-card);
+    padding:18px 20px; box-shadow: 0 1px 3px rgba(20,24,38,0.04);
+  }
+  .summary-card .period-label{ font-size:12px; color:var(--ink-dim); margin-bottom:12px; letter-spacing:0.01em; }
+  .house-row{ display:flex; align-items:center; justify-content:space-between; padding:6px 0; }
+  .house-row .who{ display:flex; align-items:center; gap:8px; font-size:13.5px; color: var(--ink-dim); }
+  .house-row .amt-group{ display:flex; flex-direction:column; align-items:flex-end; }
+  .house-row .amt{ font-family:'Roboto Mono', monospace; font-size:16px; font-weight:600; color:#141826; }
+  .house-row .ppl{ font-family:'Roboto Mono', monospace; font-size:11.5px; color:var(--ink-faint); margin-top:1px; }
+  .house-row.leader .amt{ color: var(--h1); }
+  .divider-thin{ height:1px; background:var(--line); margin:8px 0; }
+  .lead-line{ font-size:12px; color: var(--ink-faint); margin-top:6px; }
+
+  .toggle-row{ display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+  .toggle-btn{
+    background: var(--surface-2); border:1px solid var(--line); color: var(--ink-dim);
+    border-radius: var(--radius-pill); padding:7px 16px; font-size:13px; font-weight:500;
+  }
+  .toggle-btn.active{ background: var(--ink); color: #fff; border-color: var(--ink); font-weight:600; }
+
+  canvas{ max-width:100%; }
+  .chart-box{ position:relative; height: 300px; }
+
+  table{ width:100%; border-collapse: collapse; font-size:13.5px; }
+  thead th{
+    text-align:left; font-weight:600; color:var(--ink-faint); font-size:11.5px;
+    padding:0 10px 10px; border-bottom:1px solid var(--line); white-space:nowrap;
+  }
+  thead tr.subhead th{
+    font-weight:500; font-size:10.5px; padding-top:0; padding-bottom:8px; color:var(--ink-faint);
+  }
+  thead th.num, td.num{ text-align:right; }
+  tbody td{ padding:11px 10px; border-bottom:1px solid var(--line); font-family:'Roboto Mono', monospace; white-space:nowrap; }
+  tbody td.date-cell{ font-family:'Inter',sans-serif; color:var(--ink-dim); }
+  tbody tr:hover{ background: rgba(28,34,48,0.015); }
+  .row-actions{ display:flex; gap:6px; justify-content:flex-end; align-items:center; }
+  .icon-btn{
+    background:none; border:1px solid var(--line); color:var(--ink-dim); border-radius:7px;
+    width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:13px;
+  }
+  .icon-btn:hover{ border-color: var(--ink-faint); color: var(--bad); }
+  .locked-tag{
+    font-size:10.5px; font-weight:600; color: var(--good); background: rgba(30,138,95,0.10);
+    padding:3px 8px; border-radius:6px; letter-spacing:0.02em;
+  }
+  .table-scroll{ overflow-x:auto; }
+  .empty-state{ text-align:center; padding:36px 20px; color:var(--ink-dim); }
+  .empty-state .big{ font-family:'Fraunces', serif; font-size:20px; color:#141826; margin-bottom:6px; }
+
+  footer.foot{ text-align:center; color:var(--ink-faint); font-size:12px; margin-top:40px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow-row">
+      <span class="marquee-tag">DAILY PERFORMANCE RECORD · GHANA</span>
+      <span class="marquee-tag" id="syncStatus">CONNECTING…</span>
+      <span class="marquee-tag" id="todayLabel"></span>
+    </div>
+    <h1 class="title">Malaika Hospitality Performances</h1>
+    <p class="subtitle">Log each property's daily revenue and guest count, watch it roll up into monthly and yearly totals, and track true performance across the group — once a day is confirmed, its figures are locked.</p>
+    <div class="names-row">
+      <div class="name-chip"><span class="dot" style="background:var(--h1)"></span><input id="name1" value="Executive Movie House" maxlength="28"></div>
+      <div class="name-chip"><span class="dot" style="background:var(--h2)"></span><input id="name2" value="Galaxy Movie House" maxlength="28"></div>
+      <div class="name-chip"><span class="dot" style="background:var(--h3)"></span><input id="name3" value="Malaika Guest House" maxlength="28"></div>
+      <div class="name-chip">
+        <span class="dot" style="background:var(--ink-faint)"></span>
+        <select id="currencySel">
+          <option value="₵">₵ GHS</option>
+          <option value="$">$ USD</option>
+          <option value="€">€ EUR</option>
+          <option value="£">£ GBP</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <section class="card">
+    <h2>Record today's figures</h2>
+    <div class="hint">Enter each property's revenue and guest count for a date, then save to confirm. Confirmed figures cannot be edited — only voided and re-entered if a genuine correction is needed.</div>
+    <div class="field date-field">
+      <label for="entryDate">Date</label>
+      <input type="date" id="entryDate">
+    </div>
+    <div class="entry-houses-grid">
+      <div class="entry-house-card" style="border-left-color:var(--h1);">
+        <div class="entry-house-title" id="entryTitle1">Executive Movie House</div>
+        <div class="field money">
+          <label>Revenue</label>
+          <span class="cur" id="curSign1">₵</span>
+          <input type="number" id="amt1" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field people">
+          <label>Guests / attendance</label>
+          <span class="ppl-icon">👥</span>
+          <input type="number" id="ppl1" min="0" step="1" placeholder="0">
+        </div>
+      </div>
+      <div class="entry-house-card" style="border-left-color:var(--h2);">
+        <div class="entry-house-title" id="entryTitle2">Galaxy Movie House</div>
+        <div class="field money">
+          <label>Revenue</label>
+          <span class="cur" id="curSign2">₵</span>
+          <input type="number" id="amt2" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field people">
+          <label>Guests / attendance</label>
+          <span class="ppl-icon">👥</span>
+          <input type="number" id="ppl2" min="0" step="1" placeholder="0">
+        </div>
+      </div>
+      <div class="entry-house-card" style="border-left-color:var(--h3);">
+        <div class="entry-house-title" id="entryTitle3">Malaika Guest House</div>
+        <div class="field money">
+          <label>Revenue</label>
+          <span class="cur" id="curSign3">₵</span>
+          <input type="number" id="amt3" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field people">
+          <label>Guests / attendance</label>
+          <span class="ppl-icon">👥</span>
+          <input type="number" id="ppl3" min="0" step="1" placeholder="0">
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" id="saveBtn">Confirm entry</button>
+    <div class="form-note" id="formNote">No entry for this date yet.</div>
+  </section>
+
+  <section class="section-gap">
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="period-label">TODAY</div>
+        <div id="sumToday"></div>
+      </div>
+      <div class="summary-card">
+        <div class="period-label" id="monthLabel">THIS MONTH</div>
+        <div id="sumMonth"></div>
+      </div>
+      <div class="summary-card">
+        <div class="period-label" id="yearLabel">THIS YEAR</div>
+        <div id="sumYear"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card section-gap">
+    <h2>Performance map — revenue</h2>
+    <div class="hint">Real revenue over time for all three properties — the line rises and falls with actual sales, so you can see exactly who's pulling ahead or falling off.</div>
+    <div class="toggle-row" id="trendToggle">
+      <button class="toggle-btn active" data-g="daily">Daily</button>
+      <button class="toggle-btn" data-g="monthly">Monthly</button>
+      <button class="toggle-btn" data-g="yearly">Yearly</button>
+    </div>
+    <div class="chart-box">
+      <canvas id="trendChart"></canvas>
+      <div id="chartEmpty" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center; flex-direction:column; text-align:center; color:var(--ink-dim); font-size:13.5px;">
+        <div style="font-family:'Fraunces',serif; font-size:17px; color:#141826; margin-bottom:6px;">Nothing to plot yet</div>
+        <div>Confirm at least one day's entry above and the map will draw itself.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card section-gap">
+    <h2>Attendance map — guests</h2>
+    <div class="hint">Real guest and attendance counts over time — the line rises and falls with actual footfall, so you can see who's drawing the bigger numbers.</div>
+    <div class="toggle-row" id="attendanceToggle">
+      <button class="toggle-btn active" data-g="daily">Daily</button>
+      <button class="toggle-btn" data-g="monthly">Monthly</button>
+      <button class="toggle-btn" data-g="yearly">Yearly</button>
+    </div>
+    <div class="chart-box">
+      <canvas id="attendanceChart"></canvas>
+      <div id="chartEmptyAttendance" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center; flex-direction:column; text-align:center; color:var(--ink-dim); font-size:13.5px;">
+        <div style="font-family:'Fraunces',serif; font-size:17px; color:#141826; margin-bottom:6px;">Nothing to plot yet</div>
+        <div>Confirm at least one day's entry above and the map will draw itself.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card section-gap">
+    <h2>All entries</h2>
+    <div class="hint">Most recent first. Confirmed entries are locked; use void only to correct a genuine mistake.</div>
+    <div class="table-scroll">
+      <table id="entryTable">
+        <thead>
+          <tr>
+            <th rowspan="2">Date</th>
+            <th colspan="2" class="num" id="thH1" style="color:var(--h1);">Executive Movie House</th>
+            <th colspan="2" class="num" id="thH2" style="color:var(--h2);">Galaxy Movie House</th>
+            <th colspan="2" class="num" id="thH3" style="color:var(--h3);">Malaika Guest House</th>
+            <th class="num" rowspan="2">Total revenue</th>
+            <th class="num" rowspan="2">Leader</th>
+            <th rowspan="2"></th>
+          </tr>
+          <tr class="subhead">
+            <th class="num">Revenue</th><th class="num">Guests</th>
+            <th class="num">Revenue</th><th class="num">Guests</th>
+            <th class="num">Revenue</th><th class="num">Guests</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="big">No entries yet</div>
+        <div>Add today's figures above to start the ledger.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot" id="footNote">Data is stored privately in this browser only.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var LS_ENTRIES_KEY = 'boxoffice_entries_v3';
+  var LS_SETTINGS_KEY = 'boxoffice_settings_v3';
+  var HOUSE_NUMS = [1,2,3];
+
+  function lsLoadEntries(){ try{ var raw = localStorage.getItem(LS_ENTRIES_KEY); return raw ? JSON.parse(raw) : {}; }catch(e){ return {}; } }
+  function lsSaveEntries(o){ try{ localStorage.setItem(LS_ENTRIES_KEY, JSON.stringify(o)); }catch(e){} }
+  function lsLoadSettings(){ try{ var raw = localStorage.getItem(LS_SETTINGS_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; } }
+  function lsSaveSettings(s){ try{ localStorage.setItem(LS_SETTINGS_KEY, JSON.stringify(s)); }catch(e){} }
+
+  var db = null;
+  var USE_DB = false;
+  // entries: { 'YYYY-MM-DD': {h1,h2,h3,p1,p2,p3} } — presence of a key means it is CONFIRMED and locked
+  var entries = {};
+  var settings = {name1:'Executive Movie House', name2:'Galaxy Movie House', name3:'Malaika Guest House', currency:'₵'};
+  var settingsSaveTimer = null;
+
+  function setSyncStatus(text){
+    var el = document.getElementById('syncStatus');
+    if(el) el.textContent = text;
+    var foot = document.getElementById('footNote');
+    if(foot){
+      foot.textContent = USE_DB
+        ? 'Saved to this page — open this same link anytime, on any device, to see it.'
+        : 'Saved on this device only. Each computer or phone that opens this page keeps its own copy.';
+    }
+  }
+
+  function emptyFigures(){ return {h1:0,h2:0,h3:0,p1:0,p2:0,p3:0}; }
+  function normalizeEntry(e){
+    return {
+      h1:Number(e.h1)||0, h2:Number(e.h2)||0, h3:Number(e.h3)||0,
+      p1:Number(e.p1)||0, p2:Number(e.p2)||0, p3:Number(e.p3)||0
+    };
+  }
+
+  async function persistEntry(d, fig){
+    if(USE_DB){
+      try{ await db.collection('entries').doc(d).set(fig); return true; }
+      catch(e){ alert('Could not save that entry — check your connection and try again.'); return false; }
+    }
+    entries[d] = fig;
+    lsSaveEntries(entries);
+    return true;
+  }
+  async function deleteEntryRemote(d){
+    if(USE_DB){
+      try{ await db.collection('entries').doc(d).delete(); return true; }
+      catch(e){ alert('Could not remove that entry — check your connection and try again.'); return false; }
+    }
+    delete entries[d];
+    lsSaveEntries(entries);
+    return true;
+  }
+  function persistSettingsDebounced(){
+    if(settingsSaveTimer) clearTimeout(settingsSaveTimer);
+    settingsSaveTimer = setTimeout(function(){
+      if(USE_DB){
+        db.doc('settings/config').set({name1:settings.name1, name2:settings.name2, name3:settings.name3, currency:settings.currency}).catch(function(){});
+      } else {
+        lsSaveSettings(settings);
+      }
+    }, 500);
+  }
+
+  async function initStorage(){
+    try{
+      if(window.claude && typeof window.claude.use === 'function'){
+        db = await window.claude.use('db');
+      }
+    }catch(e){ db = null; }
+
+    if(db){
+      USE_DB = true;
+      setSyncStatus('SAVED TO THIS PAGE');
+      db.doc('settings/config').onSnapshot(function(snap){
+        if(snap.exists){
+          var d = snap.data();
+          settings.name1 = d.name1 || settings.name1;
+          settings.name2 = d.name2 || settings.name2;
+          settings.name3 = d.name3 || settings.name3;
+          settings.currency = d.currency || settings.currency;
+          applySettingsToUI();
+          renderAll();
+        }
+      }, function(){ /* keep local values on subscription error */ });
+
+      db.collection('entries').onSnapshot(function(snap){
+        var next = {};
+        snap.docs.forEach(function(doc){
+          next[doc.id] = normalizeEntry(doc.data());
+        });
+        entries = next;
+        refreshFormNote();
+        renderAll();
+      }, function(){ /* keep local values on subscription error */ });
+    } else {
+      USE_DB = false;
+      setSyncStatus('SAVED ON THIS DEVICE');
+      entries = lsLoadEntries();
+      Object.keys(entries).forEach(function(k){ entries[k] = normalizeEntry(entries[k]); });
+      var s = lsLoadSettings();
+      if(s){
+        settings.name1 = s.name1 || settings.name1;
+        settings.name2 = s.name2 || settings.name2;
+        settings.name3 = s.name3 || settings.name3;
+        settings.currency = s.currency || settings.currency;
+      }
+      applySettingsToUI();
+      renderAll();
+    }
+  }
+
+  function fmtMoney(n){
+    var v = Math.round((n||0)*100)/100;
+    return settings.currency + v.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function fmtCount(n){ return Math.round(n||0).toLocaleString(); }
+  function todayStr(){
+    var d = new Date(); var tz = d.getTimezoneOffset()*60000;
+    return new Date(d - tz).toISOString().slice(0,10);
+  }
+  function monthKey(dateStr){ return dateStr.slice(0,7); }
+  function yearKey(dateStr){ return dateStr.slice(0,4); }
+  function monthLabelFromKey(k){
+    var parts = k.split('-'); var d = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, 1);
+    return d.toLocaleDateString(undefined,{month:'short', year:'2-digit'});
+  }
+  function niceDate(k){ var d = new Date(k+'T00:00:00'); return d.toLocaleDateString(undefined,{month:'short', day:'numeric', year:'numeric'}); }
+  function sortedDates(){ return Object.keys(entries).sort(); }
+
+  function sumRange(filterFn){
+    var t = emptyFigures();
+    sortedDates().forEach(function(d){
+      if(filterFn(d)){
+        var e = entries[d];
+        HOUSE_NUMS.forEach(function(n){ t['h'+n] += e['h'+n]; t['p'+n] += e['p'+n]; });
+      }
+    });
+    return t;
+  }
+  function aggregate(granularity){
+    var dates = sortedDates(); var map = {}; var order = [];
+    dates.forEach(function(d){
+      var key = granularity==='daily' ? d : (granularity==='monthly' ? monthKey(d) : yearKey(d));
+      if(!map[key]){ map[key] = emptyFigures(); order.push(key); }
+      HOUSE_NUMS.forEach(function(n){ map[key]['h'+n] += entries[d]['h'+n]; map[key]['p'+n] += entries[d]['p'+n]; });
+    });
+    order.sort();
+    return order.map(function(k){
+      var label = granularity==='daily' ? niceDate(k) : (granularity==='monthly' ? monthLabelFromKey(k) : k);
+      var row = {key:k, label:label};
+      HOUSE_NUMS.forEach(function(n){ row['h'+n] = map[k]['h'+n]; row['p'+n] = map[k]['p'+n]; });
+      return row;
+    });
+  }
+
+  function houseList(){
+    return HOUSE_NUMS.map(function(n){
+      return { n:n, name: settings['name'+n], color:'var(--h'+n+')', hex: n===1?'#1F3A93':(n===2?'#7B3FE4':'#0D9488') };
+    });
+  }
+
+  var nameEls = {}, currencySel;
+  HOUSE_NUMS.forEach(function(n){ nameEls[n] = document.getElementById('name'+n); });
+  currencySel = document.getElementById('currencySel');
+
+  function applySettingsToUI(){
+    HOUSE_NUMS.forEach(function(n){
+      nameEls[n].value = settings['name'+n];
+      document.getElementById('curSign'+n).textContent = settings.currency;
+      document.getElementById('entryTitle'+n).textContent = settings['name'+n];
+      var th = document.getElementById('thH'+n);
+      if(th) th.textContent = settings['name'+n];
+    });
+    currencySel.value = settings.currency;
+  }
+  applySettingsToUI();
+
+  HOUSE_NUMS.forEach(function(n){
+    nameEls[n].addEventListener('input', function(){
+      settings['name'+n] = nameEls[n].value || settings['name'+n];
+      applySettingsToUI(); renderAll(); persistSettingsDebounced();
+    });
+  });
+  currencySel.addEventListener('change', function(){ settings.currency = currencySel.value; applySettingsToUI(); renderAll(); persistSettingsDebounced(); });
+
+  document.getElementById('todayLabel').textContent = new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric', year:'numeric'});
+
+  var entryDate = document.getElementById('entryDate');
+  var amtEls = {}, pplEls = {};
+  HOUSE_NUMS.forEach(function(n){ amtEls[n] = document.getElementById('amt'+n); pplEls[n] = document.getElementById('ppl'+n); });
+  var saveBtn = document.getElementById('saveBtn');
+  var formNote = document.getElementById('formNote');
+
+  entryDate.value = todayStr();
+
+  function setFieldsDisabled(disabled){
+    HOUSE_NUMS.forEach(function(n){ amtEls[n].disabled = disabled; pplEls[n].disabled = disabled; });
+    saveBtn.disabled = disabled;
+  }
+
+  function refreshFormNote(){
+    var d = entryDate.value;
+    formNote.classList.remove('locked','fresh');
+    if(!d){ formNote.textContent = ''; return; }
+    if(entries[d]){
+      var e = entries[d];
+      HOUSE_NUMS.forEach(function(n){ amtEls[n].value = e['h'+n]; pplEls[n].value = e['p'+n]; });
+      setFieldsDisabled(true);
+      formNote.classList.add('locked');
+      formNote.innerHTML = niceDate(d) + ' is already confirmed and locked.'
+        + '<button class="void-link" id="voidBtn">Void this entry</button>';
+      var vb = document.getElementById('voidBtn');
+      if(vb){ vb.addEventListener('click', function(){ voidEntry(d); }); }
+    } else {
+      setFieldsDisabled(false);
+      HOUSE_NUMS.forEach(function(n){ amtEls[n].value=''; pplEls[n].value=''; });
+      formNote.classList.add('fresh');
+      formNote.textContent = 'Open for entry — figures lock once confirmed.';
+    }
+  }
+  entryDate.addEventListener('change', refreshFormNote);
+  refreshFormNote();
+
+  async function voidEntry(d){
+    if(!confirm('Void the confirmed entry for '+niceDate(d)+'? This removes it permanently so it can be re-entered.')) return;
+    var ok = await deleteEntryRemote(d);
+    if(ok){ delete entries[d]; refreshFormNote(); renderAll(); }
+  }
+
+  saveBtn.addEventListener('click', async function(){
+    var d = entryDate.value;
+    if(!d || entries[d]) return;
+    var fig = emptyFigures();
+    HOUSE_NUMS.forEach(function(n){
+      var v = parseFloat(amtEls[n].value); if(isNaN(v)||v<0) v = 0;
+      var c = parseInt(pplEls[n].value,10); if(isNaN(c)||c<0) c = 0;
+      fig['h'+n] = v; fig['p'+n] = c;
+    });
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+    var ok = await persistEntry(d, fig);
+    saveBtn.textContent = 'Confirm entry';
+    if(ok){ entries[d] = fig; refreshFormNote(); renderAll(); }
+    else { saveBtn.disabled = false; }
+  });
+
+  var tableBody = document.getElementById('tableBody');
+  var emptyState = document.getElementById('emptyState');
+  var entryTable = document.getElementById('entryTable');
+
+  function leaderOf(e){
+    var houses = houseList();
+    var max = -Infinity, top = [];
+    houses.forEach(function(h){ if(e['h'+h.n] > max) max = e['h'+h.n]; });
+    houses.forEach(function(h){ if(e['h'+h.n] === max) top.push(h); });
+    if(max <= 0) return {label:'—', color:'var(--ink-faint)'};
+    if(top.length > 1) return {label:'Tie', color:'var(--ink-faint)'};
+    return {label:top[0].name, color:top[0].color};
+  }
+
+  function renderTable(){
+    var dates = sortedDates().slice().reverse();
+    if(dates.length===0){ entryTable.style.display='none'; emptyState.style.display='block'; return; }
+    entryTable.style.display='table'; emptyState.style.display='none';
+    tableBody.innerHTML = dates.map(function(d){
+      var e = entries[d];
+      var total = e.h1 + e.h2 + e.h3;
+      var lead = leaderOf(e);
+      var cells = HOUSE_NUMS.map(function(n){
+        return '<td class="num">'+fmtMoney(e['h'+n])+'</td><td class="num">'+fmtCount(e['p'+n])+'</td>';
+      }).join('');
+      return '<tr>'
+        + '<td class="date-cell">'+niceDate(d)+'</td>'
+        + cells
+        + '<td class="num">'+fmtMoney(total)+'</td>'
+        + '<td class="num" style="color:'+lead.color+'">'+lead.label+'</td>'
+        + '<td><div class="row-actions"><span class="locked-tag">LOCKED</span><button class="icon-btn" data-void="'+d+'" title="Void entry">✕</button></div></td>'
+        + '</tr>';
+    }).join('');
+    tableBody.querySelectorAll('[data-void]').forEach(function(btn){
+      btn.addEventListener('click', function(){ voidEntry(btn.getAttribute('data-void')); });
+    });
+  }
+
+  function renderRow(container, fig, showTotal){
+    var houses = houseList();
+    var max = Math.max(fig.h1, fig.h2, fig.h3);
+    var leadersCount = houses.filter(function(h){ return fig['h'+h.n]===max; }).length;
+    var html = '';
+    houses.forEach(function(h){
+      var isLeader = max>0 && fig['h'+h.n]===max && leadersCount===1;
+      html += '<div class="house-row'+(isLeader?' leader':'')+'"><span class="who"><span class="dot" style="background:'+h.color+'"></span>'+h.name+'</span><span class="amt-group"><span class="amt" style="'+(isLeader?('color:'+h.color+';'):'')+'">'+fmtMoney(fig['h'+h.n])+'</span><span class="ppl">'+fmtCount(fig['p'+h.n])+' guests</span></span></div>';
+    });
+    if(showTotal){
+      html += '<div class="divider-thin"></div>';
+      var totalRev = fig.h1+fig.h2+fig.h3, totalPpl = fig.p1+fig.p2+fig.p3;
+      html += '<div class="house-row"><span class="who">Combined</span><span class="amt-group"><span class="amt">'+fmtMoney(totalRev)+'</span><span class="ppl">'+fmtCount(totalPpl)+' guests</span></span></div>';
+      if(totalRev===0){ html += '<div class="lead-line">No figures recorded yet</div>'; }
+      else if(leadersCount>1){ html += '<div class="lead-line">Tied lead</div>'; }
+      else {
+        var leader = houses.filter(function(h){ return fig['h'+h.n]===max; })[0];
+        html += '<div class="lead-line">'+leader.name+' in the lead</div>';
+      }
+    }
+    container.innerHTML = html;
+  }
+
+  function renderSummaries(){
+    var t = todayStr();
+    renderRow(document.getElementById('sumToday'), entries[t] || emptyFigures(), false);
+
+    var mKey = monthKey(t);
+    renderRow(document.getElementById('sumMonth'), sumRange(function(d){ return monthKey(d)===mKey; }), true);
+    document.getElementById('monthLabel').textContent = 'THIS MONTH · ' + monthLabelFromKey(mKey).toUpperCase();
+
+    var yKey = yearKey(t);
+    renderRow(document.getElementById('sumYear'), sumRange(function(d){ return yearKey(d)===yKey; }), true);
+    document.getElementById('yearLabel').textContent = 'THIS YEAR · ' + yKey;
+  }
+
+  var trendGranularity = 'daily';
+  var attendanceGranularity = 'daily';
+  var trendChart, attendanceChart;
+
+  function wireGranularityToggle(toggleId, onChange){
+    document.getElementById(toggleId).querySelectorAll('.toggle-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.getElementById(toggleId).querySelectorAll('.toggle-btn').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        onChange(btn.getAttribute('data-g'));
+        renderCharts();
+      });
+    });
+  }
+  wireGranularityToggle('trendToggle', function(g){ trendGranularity = g; });
+  wireGranularityToggle('attendanceToggle', function(g){ attendanceGranularity = g; });
+
+  function renderOneChart(opts){
+    var data = aggregate(opts.granularity);
+    var canvasEl = document.getElementById(opts.canvasId);
+    var emptyEl = document.getElementById(opts.emptyId);
+    var existing = opts.getChart();
+
+    if(data.length === 0){
+      canvasEl.style.display = 'none';
+      emptyEl.style.display = 'flex';
+      emptyEl.innerHTML = '<div style="font-family:\'Fraunces\',serif; font-size:17px; color:#141826; margin-bottom:6px;">Nothing to plot yet</div><div>Confirm at least one day\'s entry above and the map will draw itself.</div>';
+      if(existing){ existing.destroy(); opts.setChart(null); }
+      return;
+    }
+    canvasEl.style.display = 'block';
+    emptyEl.style.display = 'none';
+
+    if(typeof Chart === 'undefined'){
+      emptyEl.style.display = 'flex';
+      canvasEl.style.display = 'none';
+      emptyEl.innerHTML = '<div style="font-family:\'Fraunces\',serif; font-size:17px; color:#141826; margin-bottom:6px;">Map couldn\'t load</div>'
+        + '<div style="margin-bottom:12px;">The charting library didn\'t reach your browser this time.</div>'
+        + '<button class="btn-primary retry-chart-btn" style="padding:9px 18px; margin-top:0;">Retry</button>';
+      var rb = emptyEl.querySelector('.retry-chart-btn');
+      if(rb){ rb.addEventListener('click', function(){
+        rb.textContent = 'Loading…'; rb.disabled = true;
+        loadChartJs().then(function(){ renderCharts(); }).catch(function(){ renderCharts(); });
+      }); }
+      return;
+    }
+
+    var ctx = canvasEl.getContext('2d');
+    if(existing) existing.destroy();
+    var gridColor = 'rgba(28,34,48,0.07)';
+    var tickColor = '#5C6478';
+    var houses = houseList();
+
+    var datasets = houses.map(function(h){
+      var key = opts.metric==='revenue' ? ('h'+h.n) : ('p'+h.n);
+      return {
+        label: h.name,
+        data: data.map(function(r){ return r[key]; }),
+        borderColor: h.hex,
+        backgroundColor: h.hex + '14',
+        tension:0.3, fill:true,
+        pointRadius: data.length>40?0:3,
+        pointBackgroundColor: h.hex,
+        borderWidth:2.4
+      };
+    });
+
+    var chart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: data.map(function(r){ return r.label; }), datasets: datasets },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        interaction:{ mode:'index', intersect:false },
+        plugins:{
+          legend:{ labels:{ color: tickColor, font:{family:'Inter'} } },
+          tooltip:{ callbacks:{ label:function(ctx2){ return ctx2.dataset.label+': '+opts.fmtVal(ctx2.parsed.y); } } }
+        },
+        scales:{
+          x:{ grid:{color:gridColor}, ticks:{color:tickColor, maxRotation:0, autoSkip:true} },
+          y:{ grid:{color:gridColor}, ticks:{color:tickColor, callback:opts.yTick} }
+        }
+      }
+    });
+    opts.setChart(chart);
+  }
+
+  function renderCharts(){
+    renderOneChart({
+      granularity: trendGranularity, canvasId: 'trendChart', emptyId: 'chartEmpty', metric: 'revenue',
+      fmtVal: fmtMoney, yTick: function(v){ return settings.currency+v; },
+      getChart: function(){ return trendChart; }, setChart: function(c){ trendChart = c; }
+    });
+    renderOneChart({
+      granularity: attendanceGranularity, canvasId: 'attendanceChart', emptyId: 'chartEmptyAttendance', metric: 'attendance',
+      fmtVal: fmtCount, yTick: function(v){ return fmtCount(v); },
+      getChart: function(){ return attendanceChart; }, setChart: function(c){ attendanceChart = c; }
+    });
+  }
+
+  function renderAll(){ renderTable(); renderSummaries(); renderCharts(); }
+  renderAll(); // first paint with empty state while storage connects
+  initStorage();
+
+  if(window.__chartJsReady){
+    window.__chartJsReady.then(function(){ renderCharts(); }).catch(function(){ renderCharts(); });
+  }
+})();
+</script>
+</body>
+</html>
