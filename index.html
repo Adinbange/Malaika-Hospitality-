@@ -54,8 +54,14 @@
   .wrap{ max-width: 1040px; margin: 0 auto; padding: 28px 20px 80px; }
 
   header.hero{ padding: 18px 4px 30px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
-  .eyebrow-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .eyebrow-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .eyebrow-left{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .marquee-tag{ font-family:'Roboto Mono', monospace; font-size:11px; letter-spacing:0.04em; color: var(--ink-faint); }
+  .role-badge{
+    font-family:'Roboto Mono', monospace; font-size:10.5px; letter-spacing:0.03em; font-weight:700;
+    padding:4px 9px; border-radius:6px; background: rgba(184,134,46,0.12); color: var(--gold);
+  }
+  .role-badge.admin{ background: rgba(30,138,95,0.12); color: var(--good); }
   h1.title{
     font-family:'Fraunces', serif; font-weight:700;
     font-size: clamp(28px, 5vw, 42px); line-height:1.1;
@@ -78,6 +84,7 @@
   .name-chip input{ width: 150px; }
   .name-chip input:focus, .name-chip select:focus{ outline:none; }
   .name-chip select{ cursor:pointer; color: var(--ink-dim); font-weight:500; }
+  .name-chip input:disabled, .name-chip select:disabled{ color: var(--ink-faint); cursor:not-allowed; }
 
   .card{
     background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card);
@@ -119,7 +126,8 @@
   .form-note{ font-size:12.5px; color: var(--ink-faint); margin-top:10px; }
   .form-note.locked{ color: var(--bad); font-weight:500; }
   .form-note.fresh{ color: var(--good); font-weight:500; }
-  .void-link{ background:none; border:none; color:var(--h1); font-size:12.5px; text-decoration:underline; padding:0; margin-left:6px; cursor:pointer; }
+  .void-link{ background:none; border:none; color:var(--h1); font-size:12.5px; text-decoration:underline; padding:0; margin-left:6px; cursor:pointer; font-family:'Inter',sans-serif; }
+  .void-link.danger{ color: var(--bad); }
 
   .summary-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
   @media (max-width:700px){ .summary-grid{ grid-template-columns: 1fr; } }
@@ -133,7 +141,6 @@
   .house-row .amt-group{ display:flex; flex-direction:column; align-items:flex-end; }
   .house-row .amt{ font-family:'Roboto Mono', monospace; font-size:16px; font-weight:600; color:#141826; }
   .house-row .ppl{ font-family:'Roboto Mono', monospace; font-size:11.5px; color:var(--ink-faint); margin-top:1px; }
-  .house-row.leader .amt{ color: var(--h1); }
   .divider-thin{ height:1px; background:var(--line); margin:8px 0; }
   .lead-line{ font-size:12px; color: var(--ink-faint); margin-top:6px; }
 
@@ -172,8 +179,36 @@
   .table-scroll{ overflow-x:auto; }
   .empty-state{ text-align:center; padding:36px 20px; color:var(--ink-dim); }
   .empty-state .big{ font-family:'Fraunces', serif; font-size:20px; color:#141826; margin-bottom:6px; }
+  .audit-detail{ white-space:normal; font-family:'Inter',sans-serif; font-size:12.5px; color:var(--ink-dim); max-width:420px; }
 
   footer.foot{ text-align:center; color:var(--ink-faint); font-size:12px; margin-top:40px; }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(20,24,38,0.45); z-index:1000;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-card{
+    background:var(--surface); border-radius:14px; padding:22px; max-width:360px; width:100%;
+    box-shadow: 0 20px 50px rgba(20,24,38,0.25);
+  }
+  .modal-title{ font-family:'Fraunces',serif; font-weight:600; font-size:18px; color:#141826; margin-bottom:8px; }
+  .modal-text{ font-size:13.5px; color:var(--ink-dim); line-height:1.5; margin:0 0 14px; }
+  .modal-input{
+    width:100%; background:var(--surface-2); border:1px solid var(--line); border-radius:9px;
+    color:var(--ink); padding:11px 12px; font-family:'Inter',sans-serif; font-size:15px; margin-bottom:8px;
+  }
+  .modal-input:focus{ outline:none; border-color: var(--ink-faint); }
+  .modal-error{ color:var(--bad); font-size:12.5px; margin-bottom:8px; }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:6px; }
+  .btn-secondary{
+    background:var(--surface-2); color:var(--ink-dim); border:1px solid var(--line); border-radius:9px;
+    padding:10px 18px; font-weight:600; font-size:13.5px;
+  }
+  .btn-danger{
+    background:var(--bad); color:#fff; border:none; border-radius:9px;
+    padding:10px 18px; font-weight:600; font-size:13.5px;
+  }
 </style>
 </head>
 <body>
@@ -181,12 +216,15 @@
 
   <header class="hero">
     <div class="eyebrow-row">
-      <span class="marquee-tag">DAILY PERFORMANCE RECORD · GHANA</span>
-      <span class="marquee-tag" id="syncStatus">CONNECTING…</span>
+      <div class="eyebrow-left">
+        <span class="marquee-tag">DAILY PERFORMANCE RECORD · GHANA</span>
+        <span class="role-badge" id="roleBadge">MANAGER VIEW</span>
+        <button class="void-link" id="roleSwitchBtn">Switch to Administrator</button>
+      </div>
       <span class="marquee-tag" id="todayLabel"></span>
     </div>
     <h1 class="title">Malaika Hospitality Performances</h1>
-    <p class="subtitle">Log each property's daily revenue and guest count, watch it roll up into monthly and yearly totals, and track true performance across the group — once a day is confirmed, its figures are locked.</p>
+    <p class="subtitle">Log each property's daily revenue and guest count, watch it roll up into monthly and yearly totals, and track true performance across the group — once a day is confirmed, only an Administrator can change it.</p>
     <div class="names-row">
       <div class="name-chip"><span class="dot" style="background:var(--h1)"></span><input id="name1" value="Executive Movie House" maxlength="28"></div>
       <div class="name-chip"><span class="dot" style="background:var(--h2)"></span><input id="name2" value="Galaxy Movie House" maxlength="28"></div>
@@ -205,7 +243,7 @@
 
   <section class="card">
     <h2>Record today's figures</h2>
-    <div class="hint">Enter each property's revenue and guest count for a date, then save to confirm. Confirmed figures cannot be edited — only voided and re-entered if a genuine correction is needed.</div>
+    <div class="hint">Enter each property's revenue and guest count for a date, then save to confirm. Once confirmed, only an Administrator can edit or void that entry.</div>
     <div class="field date-field">
       <label for="entryDate">Date</label>
       <input type="date" id="entryDate">
@@ -308,7 +346,7 @@
 
   <section class="card section-gap">
     <h2>All entries</h2>
-    <div class="hint">Most recent first. Confirmed entries are locked; use void only to correct a genuine mistake.</div>
+    <div class="hint">Most recent first. Confirmed entries are locked; Administrators can edit or void to correct a genuine mistake.</div>
     <div class="table-scroll">
       <table id="entryTable">
         <thead>
@@ -336,7 +374,22 @@
     </div>
   </section>
 
+  <section class="card section-gap" id="auditSection" style="display:none;">
+    <h2>Audit log</h2>
+    <div class="hint">Every entry created, edited, or voided, with who did it and when — visible to Administrators only, and recorded on this device only.</div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>When</th><th>Role</th><th>Action</th><th>Details</th></tr></thead>
+        <tbody id="auditBody"></tbody>
+      </table>
+    </div>
+  </section>
+
   <footer class="foot" id="footNote">Data is stored privately in this browser only.</footer>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card" id="modalCard"></div>
 </div>
 
 <script>
@@ -345,12 +398,17 @@
 
   var LS_ENTRIES_KEY = 'boxoffice_entries_v3';
   var LS_SETTINGS_KEY = 'boxoffice_settings_v3';
+  var LS_AUDIT_KEY = 'boxoffice_audit_v1';
+  var SESSION_ADMIN_KEY = 'malaika_admin_session';
+  var ADMIN_HASH = 'bd38e76ed23ffecb975e70ba2c5b1ac135c4dd52958e965200c1fbd745de531e'; // sha-256 of the admin password
   var HOUSE_NUMS = [1,2,3];
 
   function lsLoadEntries(){ try{ var raw = localStorage.getItem(LS_ENTRIES_KEY); return raw ? JSON.parse(raw) : {}; }catch(e){ return {}; } }
   function lsSaveEntries(o){ try{ localStorage.setItem(LS_ENTRIES_KEY, JSON.stringify(o)); }catch(e){} }
   function lsLoadSettings(){ try{ var raw = localStorage.getItem(LS_SETTINGS_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; } }
   function lsSaveSettings(s){ try{ localStorage.setItem(LS_SETTINGS_KEY, JSON.stringify(s)); }catch(e){} }
+  function lsLoadAudit(){ try{ var raw = localStorage.getItem(LS_AUDIT_KEY); return raw ? JSON.parse(raw) : []; }catch(e){ return []; } }
+  function lsSaveAudit(list){ try{ localStorage.setItem(LS_AUDIT_KEY, JSON.stringify(list.slice(-500))); }catch(e){} }
 
   var db = null;
   var USE_DB = false;
@@ -358,6 +416,9 @@
   var entries = {};
   var settings = {name1:'Executive Movie House', name2:'Galaxy Movie House', name3:'Malaika Guest House', currency:'₵'};
   var settingsSaveTimer = null;
+  var auditLog = lsLoadAudit();
+  var isAdmin = sessionStorage.getItem(SESSION_ADMIN_KEY) === '1';
+  var editModeActive = false;
 
   function setSyncStatus(text){
     var el = document.getElementById('syncStatus');
@@ -381,7 +442,7 @@
   async function persistEntry(d, fig){
     if(USE_DB){
       try{ await db.collection('entries').doc(d).set(fig); return true; }
-      catch(e){ alert('Could not save that entry — check your connection and try again.'); return false; }
+      catch(e){ showMessage('Could not save', 'That entry could not be saved — check your connection and try again.'); return false; }
     }
     entries[d] = fig;
     lsSaveEntries(entries);
@@ -390,7 +451,7 @@
   async function deleteEntryRemote(d){
     if(USE_DB){
       try{ await db.collection('entries').doc(d).delete(); return true; }
-      catch(e){ alert('Could not remove that entry — check your connection and try again.'); return false; }
+      catch(e){ showMessage('Could not remove', 'That entry could not be removed — check your connection and try again.'); return false; }
     }
     delete entries[d];
     lsSaveEntries(entries);
@@ -505,6 +566,139 @@
     });
   }
 
+  // ---------- In-page modal (replaces native prompt/alert/confirm, which can be blocked in embedded frames) ----------
+  var modalOverlay = document.getElementById('modalOverlay');
+  var modalCard = document.getElementById('modalCard');
+  function closeModal(){ modalOverlay.classList.remove('open'); modalCard.innerHTML = ''; }
+  function openModal(html, focusSelector){
+    modalCard.innerHTML = html;
+    modalOverlay.classList.add('open');
+    if(focusSelector){
+      var el = modalCard.querySelector(focusSelector);
+      if(el) setTimeout(function(){ el.focus(); }, 30);
+    }
+  }
+  modalOverlay.addEventListener('click', function(e){ if(e.target === modalOverlay) closeModal(); });
+
+  function showMessage(title, text){
+    openModal(
+      '<div class="modal-title">'+title+'</div>'
+      + '<p class="modal-text">'+text+'</p>'
+      + '<div class="modal-actions"><button class="btn-primary" id="modalOkBtn" style="margin-top:0;">OK</button></div>'
+    );
+    document.getElementById('modalOkBtn').addEventListener('click', closeModal);
+  }
+
+  function askConfirm(title, text, confirmLabel, onConfirm){
+    openModal(
+      '<div class="modal-title">'+title+'</div>'
+      + '<p class="modal-text">'+text+'</p>'
+      + '<div class="modal-actions"><button class="btn-secondary" id="modalCancelBtn">Cancel</button><button class="btn-danger" id="modalConfirmBtn">'+confirmLabel+'</button></div>'
+    );
+    document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
+    document.getElementById('modalConfirmBtn').addEventListener('click', function(){ closeModal(); onConfirm(); });
+  }
+
+  // ---------- Role switching ----------
+  async function sha256Hex(msg){
+    var enc = new TextEncoder().encode(msg);
+    var buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+  }
+  function updateRoleUI(){
+    var badge = document.getElementById('roleBadge');
+    var btn = document.getElementById('roleSwitchBtn');
+    badge.textContent = isAdmin ? 'ADMINISTRATOR VIEW' : 'MANAGER VIEW';
+    badge.classList.toggle('admin', isAdmin);
+    btn.textContent = isAdmin ? 'Switch to Manager view' : 'Switch to Administrator';
+    HOUSE_NUMS.forEach(function(n){ nameEls[n].disabled = !isAdmin; });
+    currencySel.disabled = !isAdmin;
+  }
+
+  function openAdminLogin(){
+    openModal(
+      '<div class="modal-title">Administrator sign-in</div>'
+      + '<p class="modal-text">Enter the Administrator password to edit or void entries, rename properties, and view the audit log.</p>'
+      + '<input type="password" id="modalPwInput" class="modal-input" placeholder="Password" autocomplete="off">'
+      + '<div class="modal-error" id="modalError" style="display:none;"></div>'
+      + '<div class="modal-actions"><button class="btn-secondary" id="modalCancelBtn">Cancel</button><button class="btn-primary" id="modalConfirmBtn" style="margin-top:0;">Sign in</button></div>',
+      '#modalPwInput'
+    );
+    var pwInput = document.getElementById('modalPwInput');
+    var errEl = document.getElementById('modalError');
+    document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
+    async function trySignIn(){
+      var pw = pwInput.value;
+      if(!pw){ return; }
+      var confirmBtn = document.getElementById('modalConfirmBtn');
+      confirmBtn.disabled = true; confirmBtn.textContent = 'Checking…';
+      try{
+        var hex = await sha256Hex(pw);
+        if(hex === ADMIN_HASH){
+          isAdmin = true;
+          sessionStorage.setItem(SESSION_ADMIN_KEY, '1');
+          closeModal();
+          updateRoleUI(); refreshFormNote(); renderAll(); renderAudit();
+        } else {
+          errEl.textContent = 'Incorrect password.';
+          errEl.style.display = 'block';
+          confirmBtn.disabled = false; confirmBtn.textContent = 'Sign in';
+          pwInput.value = ''; pwInput.focus();
+        }
+      }catch(e){
+        errEl.textContent = 'Could not verify the password on this browser. Try a modern browser over HTTPS.';
+        errEl.style.display = 'block';
+        confirmBtn.disabled = false; confirmBtn.textContent = 'Sign in';
+      }
+    }
+    document.getElementById('modalConfirmBtn').addEventListener('click', trySignIn);
+    pwInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') trySignIn(); });
+  }
+
+  document.getElementById('roleSwitchBtn').addEventListener('click', function(){
+    if(isAdmin){
+      isAdmin = false; editModeActive = false;
+      sessionStorage.removeItem(SESSION_ADMIN_KEY);
+      updateRoleUI(); refreshFormNote(); renderAll(); renderAudit();
+      return;
+    }
+    openAdminLogin();
+  });
+
+  // ---------- Audit log ----------
+  function diffSummary(before, after){
+    if(!before) return 'New entry saved.';
+    if(!after) return 'Entry removed.';
+    var parts = [];
+    houseList().forEach(function(h){
+      if(before['h'+h.n] !== after['h'+h.n]) parts.push(h.name+' revenue: '+fmtMoney(before['h'+h.n])+' → '+fmtMoney(after['h'+h.n]));
+      if(before['p'+h.n] !== after['p'+h.n]) parts.push(h.name+' guests: '+fmtCount(before['p'+h.n])+' → '+fmtCount(after['p'+h.n]));
+    });
+    return parts.length ? parts.join('; ') : 'No change.';
+  }
+  function addAuditEntry(action, date, before, after){
+    auditLog.push({ ts: new Date().toISOString(), role: isAdmin ? 'Administrator' : 'Manager', action: action, date: date, before: before, after: after });
+    lsSaveAudit(auditLog);
+    renderAudit();
+  }
+  function renderAudit(){
+    var section = document.getElementById('auditSection');
+    if(!isAdmin){ section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    var body = document.getElementById('auditBody');
+    var rows = auditLog.slice().reverse();
+    if(rows.length===0){
+      body.innerHTML = '<tr><td colspan="4" style="color:var(--ink-faint); padding:14px 10px; font-family:Inter,sans-serif;">No activity recorded yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function(r){
+      var when = new Date(r.ts).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      var actionLabel = r.action==='confirm' ? 'Confirmed' : (r.action==='void' ? 'Voided' : 'Edited');
+      var detail = diffSummary(r.before, r.after);
+      return '<tr><td class="date-cell">'+when+'</td><td class="date-cell">'+r.role+'</td><td class="date-cell">'+actionLabel+' · '+niceDate(r.date)+'</td><td class="audit-detail">'+detail+'</td></tr>';
+    }).join('');
+  }
+
   var nameEls = {}, currencySel;
   HOUSE_NUMS.forEach(function(n){ nameEls[n] = document.getElementById('name'+n); });
   currencySel = document.getElementById('currencySel');
@@ -520,6 +714,7 @@
     currencySel.value = settings.currency;
   }
   applySettingsToUI();
+  updateRoleUI();
 
   HOUSE_NUMS.forEach(function(n){
     nameEls[n].addEventListener('input', function(){
@@ -541,52 +736,100 @@
 
   function setFieldsDisabled(disabled){
     HOUSE_NUMS.forEach(function(n){ amtEls[n].disabled = disabled; pplEls[n].disabled = disabled; });
-    saveBtn.disabled = disabled;
   }
-
-  function refreshFormNote(){
-    var d = entryDate.value;
-    formNote.classList.remove('locked','fresh');
-    if(!d){ formNote.textContent = ''; return; }
-    if(entries[d]){
-      var e = entries[d];
-      HOUSE_NUMS.forEach(function(n){ amtEls[n].value = e['h'+n]; pplEls[n].value = e['p'+n]; });
-      setFieldsDisabled(true);
-      formNote.classList.add('locked');
-      formNote.innerHTML = niceDate(d) + ' is already confirmed and locked.'
-        + '<button class="void-link" id="voidBtn">Void this entry</button>';
-      var vb = document.getElementById('voidBtn');
-      if(vb){ vb.addEventListener('click', function(){ voidEntry(d); }); }
-    } else {
-      setFieldsDisabled(false);
-      HOUSE_NUMS.forEach(function(n){ amtEls[n].value=''; pplEls[n].value=''; });
-      formNote.classList.add('fresh');
-      formNote.textContent = 'Open for entry — figures lock once confirmed.';
-    }
-  }
-  entryDate.addEventListener('change', refreshFormNote);
-  refreshFormNote();
-
-  async function voidEntry(d){
-    if(!confirm('Void the confirmed entry for '+niceDate(d)+'? This removes it permanently so it can be re-entered.')) return;
-    var ok = await deleteEntryRemote(d);
-    if(ok){ delete entries[d]; refreshFormNote(); renderAll(); }
-  }
-
-  saveBtn.addEventListener('click', async function(){
-    var d = entryDate.value;
-    if(!d || entries[d]) return;
+  function collectFigures(){
     var fig = emptyFigures();
     HOUSE_NUMS.forEach(function(n){
       var v = parseFloat(amtEls[n].value); if(isNaN(v)||v<0) v = 0;
       var c = parseInt(pplEls[n].value,10); if(isNaN(c)||c<0) c = 0;
       fig['h'+n] = v; fig['p'+n] = c;
     });
-    saveBtn.disabled = true; saveBtn.textContent = 'Saving…';
+    return fig;
+  }
+
+  function refreshFormNote(){
+    var d = entryDate.value;
+    formNote.classList.remove('locked','fresh');
+    if(!d){ formNote.textContent = ''; saveBtn.style.display='none'; return; }
+
+    if(entries[d] && !editModeActive){
+      var e = entries[d];
+      HOUSE_NUMS.forEach(function(n){ amtEls[n].value = e['h'+n]; pplEls[n].value = e['p'+n]; });
+      setFieldsDisabled(true);
+      saveBtn.style.display = 'none';
+      formNote.classList.add('locked');
+      var html = niceDate(d) + ' is confirmed and locked.';
+      if(isAdmin){
+        html += ' <button class="void-link" id="editBtn">Edit entry</button>'
+              + '<button class="void-link danger" id="voidBtn">Void entry</button>';
+      } else {
+        html += ' Only an Administrator can make changes.';
+      }
+      formNote.innerHTML = html;
+      var eb = document.getElementById('editBtn');
+      if(eb) eb.addEventListener('click', function(){ editModeActive = true; refreshFormNote(); });
+      var vb = document.getElementById('voidBtn');
+      if(vb) vb.addEventListener('click', function(){ voidEntry(d); });
+    } else if(entries[d] && editModeActive){
+      setFieldsDisabled(false);
+      saveBtn.style.display = 'inline-block';
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save changes';
+      formNote.classList.add('fresh');
+      formNote.innerHTML = 'Editing as Administrator. <button class="void-link" id="cancelEditBtn">Cancel</button>';
+      var cb = document.getElementById('cancelEditBtn');
+      if(cb) cb.addEventListener('click', function(){ editModeActive = false; refreshFormNote(); });
+    } else {
+      setFieldsDisabled(false);
+      saveBtn.style.display = 'inline-block';
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Confirm entry';
+      HOUSE_NUMS.forEach(function(n){ amtEls[n].value=''; pplEls[n].value=''; });
+      formNote.classList.add('fresh');
+      formNote.textContent = 'Open for entry — figures lock once confirmed.';
+    }
+  }
+  entryDate.addEventListener('change', function(){ editModeActive = false; refreshFormNote(); });
+  refreshFormNote();
+
+  function voidEntry(d){
+    if(!isAdmin) return;
+    askConfirm(
+      'Void this entry?',
+      'Voiding the entry for '+niceDate(d)+' removes it permanently so it can be re-entered. This can\'t be undone.',
+      'Void entry',
+      async function(){
+        var before = entries[d] ? Object.assign({}, entries[d]) : null;
+        var ok = await deleteEntryRemote(d);
+        if(ok){
+          delete entries[d];
+          addAuditEntry('void', d, before, null);
+          editModeActive = false;
+          refreshFormNote(); renderAll();
+        }
+      }
+    );
+  }
+
+  saveBtn.addEventListener('click', async function(){
+    var d = entryDate.value;
+    if(!d) return;
+    var isEdit = !!entries[d];
+    if(isEdit && !isAdmin) return; // safety net, button is hidden in this case anyway
+    var before = isEdit ? Object.assign({}, entries[d]) : null;
+    var fig = collectFigures();
+    saveBtn.disabled = true; saveBtn.textContent = isEdit ? 'Saving…' : 'Saving…';
     var ok = await persistEntry(d, fig);
-    saveBtn.textContent = 'Confirm entry';
-    if(ok){ entries[d] = fig; refreshFormNote(); renderAll(); }
-    else { saveBtn.disabled = false; }
+    if(ok){
+      entries[d] = fig;
+      addAuditEntry(isEdit ? 'edit' : 'confirm', d, before, fig);
+      editModeActive = false;
+      refreshFormNote();
+      renderAll();
+    } else {
+      saveBtn.disabled = false;
+      saveBtn.textContent = isEdit ? 'Save changes' : 'Confirm entry';
+    }
   });
 
   var tableBody = document.getElementById('tableBody');
@@ -614,12 +857,15 @@
       var cells = HOUSE_NUMS.map(function(n){
         return '<td class="num">'+fmtMoney(e['h'+n])+'</td><td class="num">'+fmtCount(e['p'+n])+'</td>';
       }).join('');
+      var actionsHtml = isAdmin
+        ? ('<span class="locked-tag">LOCKED</span><button class="icon-btn" data-void="'+d+'" title="Void entry">✕</button>')
+        : '<span class="locked-tag">LOCKED</span>';
       return '<tr>'
         + '<td class="date-cell">'+niceDate(d)+'</td>'
         + cells
         + '<td class="num">'+fmtMoney(total)+'</td>'
         + '<td class="num" style="color:'+lead.color+'">'+lead.label+'</td>'
-        + '<td><div class="row-actions"><span class="locked-tag">LOCKED</span><button class="icon-btn" data-void="'+d+'" title="Void entry">✕</button></div></td>'
+        + '<td><div class="row-actions">'+actionsHtml+'</div></td>'
         + '</tr>';
     }).join('');
     tableBody.querySelectorAll('[data-void]').forEach(function(btn){
@@ -634,7 +880,7 @@
     var html = '';
     houses.forEach(function(h){
       var isLeader = max>0 && fig['h'+h.n]===max && leadersCount===1;
-      html += '<div class="house-row'+(isLeader?' leader':'')+'"><span class="who"><span class="dot" style="background:'+h.color+'"></span>'+h.name+'</span><span class="amt-group"><span class="amt" style="'+(isLeader?('color:'+h.color+';'):'')+'">'+fmtMoney(fig['h'+h.n])+'</span><span class="ppl">'+fmtCount(fig['p'+h.n])+' guests</span></span></div>';
+      html += '<div class="house-row"><span class="who"><span class="dot" style="background:'+h.color+'"></span>'+h.name+'</span><span class="amt-group"><span class="amt" style="'+(isLeader?('color:'+h.color+';'):'')+'">'+fmtMoney(fig['h'+h.n])+'</span><span class="ppl">'+fmtCount(fig['p'+h.n])+' guests</span></span></div>';
     });
     if(showTotal){
       html += '<div class="divider-thin"></div>';
@@ -764,6 +1010,7 @@
 
   function renderAll(){ renderTable(); renderSummaries(); renderCharts(); }
   renderAll(); // first paint with empty state while storage connects
+  renderAudit();
   initStorage();
 
   if(window.__chartJsReady){
